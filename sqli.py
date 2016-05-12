@@ -1,4 +1,3 @@
-import subprocess as sp
 import urllib as cybers
 import sys
 import os
@@ -12,12 +11,20 @@ ____ _              ___      _                     _____
                          |___/                                                 
 
 More: https://www.facebook.com/TheCybersTeam
-Fast and easy SQLi hack tool Beta 0.6
+Fast and easy SQLi hack tool Beta 0.7
 """
 print header
 
-url = "http://testphp.vulnweb.com/listproducts.php?cat="
-print "Url: "+url
+for k, v in enumerate(sys.argv):
+    if v == "-url":
+        try:
+            u = sys.argv[k+1]
+            pos = u.find("=")
+            url = u[:pos+1]
+        except:
+            pass
+
+print "Url: "+u
 print "\n"
 
 def getContent(url):
