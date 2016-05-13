@@ -1,6 +1,6 @@
 # Sqli
 - [OK] - Get Database
-- [NO] - Enumerate Tables
+- [OK] - Enumerate Tables
 - [NO] - Enumerate Columns
 - [NO] - Dump Columns
 
