@@ -30,9 +30,15 @@ for k, v in enumerate(sys.argv):
             url = u[:pos+1]
         except:
             pass
-
-print "Url: "+u
-print "\n"
+            
+try:
+    print "Url: "+u
+    print "\n"
+except NameError:
+    pass
+    print "*ERROR*: Url not defined!\n"
+    print "Usage: python sqli.py --url http://testphp.vulnweb.com/listproducts.php?cat=1\n"
+    exit()
 
 def getContent(url):
     res = cybers.urlopen(url)
@@ -61,7 +67,10 @@ def countColumns(url):
             break
     return 0
 
-columns = countColumns(url)
+try:
+    columns = countColumns(url)
+except:
+    pass
 
 def getVulColumns(columns, url):
     key = "Th3Cyb3rsT34m"
