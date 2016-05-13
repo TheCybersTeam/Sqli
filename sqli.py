@@ -6,7 +6,7 @@ import platform
 clear = "clear"
 if platform.system() == "Windows":
     clear = "cls"
-os.system(""+str(clear)+"")
+os.system(str(clear))
 
 header="""
 ____ _              ___      _                     _____                      
