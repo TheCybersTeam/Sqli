@@ -18,7 +18,7 @@ ____ _              ___      _                     _____
 
 More: https://www.facebook.com/TheCybersTeam
 Usage: python sqli.py --url http://testphp.vulnweb.com/listproducts.php?cat=1
-Fast and easy SQLi hack tool Beta 1.4
+Fast and easy SQLi hack tool Beta 1.5
 """
 print header
 
@@ -130,9 +130,11 @@ def getDatabase(vulCol,columns,url):
 
 class Db:
     name = None
-
+    tables = []
     def setName(self, name):
         self.name = name
+    def setTables(self, table):
+        self.tables = table
 
 dbs = []
 db = Db()
@@ -149,7 +151,20 @@ def getTables(database,vulCol,columns, url):
     res = getContent(url)
     return getVars(res)
 
+
+class Tb:
+    name = None
+    def setName(self,name):
+        self.name = name
+
+tbs = []
 tables = getTables(database,vulCol,columns, url)
+for i in tables.split(","):
+    tb = Tb()
+    tb.setName(i)
+    tbs.append(tb)
+
+dbs[0].setTables(tbs)
 print "Tables: "+tables
 
 sys.stdout.write("\nTable: ")
